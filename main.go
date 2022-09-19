@@ -87,11 +87,14 @@ func handleUrlArgument(url string) error {
 		docToken = node.ObjToken
 	}
 
+	md_file_name := ""
+
 	if docType == "docx" {
 		docx, blocks, err := client.GetDocxContent(ctx, docToken)
 		if err != nil {
 			return err
 		}
+		md_file_name = docx.Title
 		markdown = parser.ParseDocxContent(docx, blocks)
 	} else {
 		doc, err := client.GetDocContent(ctx, docToken)
@@ -114,7 +117,7 @@ func handleUrlArgument(url string) error {
 	})
 	result := engine.FormatStr("md", markdown)
 
-	mdName := fmt.Sprintf("%s.md", docToken)
+	mdName := fmt.Sprintf("%s.md", md_file_name)
 	if err = os.WriteFile(mdName, []byte(result), 0o644); err != nil {
 		return err
 	}

@@ -242,7 +242,7 @@ func (p *Parser) ParseDocxBlock(b *lark.DocxBlock) string {
 	case lark.DocxBlockTypeCode:
 		buf.WriteString("```\n")
 		buf.WriteString(p.ParseDocxBlockText(b.Code))
-		buf.WriteString("\n```")
+		buf.WriteString("```")
 	case lark.DocxBlockTypeQuote:
 		buf.WriteString("> ")
 		buf.WriteString(p.ParseDocxBlockText(b.Quote))
@@ -286,7 +286,7 @@ func (p *Parser) ParseDocxTextElement(e *lark.DocxTextElement) string {
 		buf.WriteString(fmt.Sprintf("[%s](%s)", e.MentionDoc.Title, utils.UnescapeURL(e.MentionDoc.URL)))
 	}
 	if e.Equation != nil {
-		buf.WriteString("%%" + e.Equation.Content + "%%")
+		buf.WriteString("$" + strings.TrimSpace(e.Equation.Content) + "$")
 	}
 	return buf.String()
 }
@@ -314,6 +314,10 @@ func (p *Parser) ParseDocxTextElementTextRun(tr *lark.DocxTextElementTextRun) st
 			buf.WriteString("[")
 			postWrite = fmt.Sprintf("](%s)", utils.UnescapeURL(link.URL))
 		}
+	}
+	if postWrite != "" && strings.HasSuffix(tr.Content, " ") {
+		postWrite += " "
+		tr.Content = strings.TrimSpace(tr.Content)
 	}
 	buf.WriteString(tr.Content)
 	buf.WriteString(postWrite)
